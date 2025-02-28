@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
+from scipy.stats import ttest_ind, mannwhitneyu
 
 # Webiste
 st.set_page_config(page_title="Fuel Consumption Analysis", layout="wide")
@@ -86,6 +87,37 @@ ax.set_xlabel("Total Cost (€)")
 ax.set_ylabel("Frequency")
 ax.set_title("Distribution of Fuel Costs per Trip")
 ax.legend()
+
+st.pyplot(fig)
+
+#Hypothesis E10 vs SP98 differences
+
+st.subheader("Hypothesis Testing: Is There a Significant Difference Between E10 and SP98?")
+
+sp98_consume = df_sp98["Actual"].dropna()
+e10_consume = df_e10["Actual"].dropna()
+
+t_stat, p_value_ttest = ttest_ind(sp98_consume, e10_consume, equal_var=False)
+
+u_stat, p_value_mannwhitney = mannwhitneyu(sp98_consume, e10_consume, alternative="greater")
+
+st.write(f"T-test p-value: **{p_value_ttest:.5f}**")
+st.write(f"Mann-Whitney U-test p-value: **{p_value_mannwhitney:.5f}**")
+
+if p_value_ttest < 0.05:
+    st.success("There is a statistically significant difference in fuel consumption between E10 and SP98.")
+else:
+    st.warning("No significant difference detected in fuel consumption between E10 and SP98.")
+
+st.subheader("Fuel Consumption Comparison: SP98 vs E10")
+
+fig, ax = plt.subplots(figsize=(10, 5))
+sns.boxplot(x=["SP98"] * len(sp98_consume) + ["E10"] * len(e10_consume),
+            y=pd.concat([sp98_consume, e10_consume]), 
+            palette=["red", "blue"], ax=ax)
+
+ax.set_ylabel("Fuel Consumption (Liters)")
+ax.set_title("Comparison of Fuel Consumption: SP98 vs E10")
 
 st.pyplot(fig)
 

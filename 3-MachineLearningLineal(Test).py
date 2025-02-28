@@ -47,6 +47,11 @@ print(df_excel.isnull().sum())
 
 df_combined = pd.concat([df_csv, df_excel], ignore_index=True)
 
+duplicates = df_combined.duplicated().sum()
+print(f"Number of duplicate rows: {duplicates}")
+
+df_combined = df_combined.drop_duplicates()
+
 from sklearn.model_selection import train_test_split
 
 features = ["distance", "speed", "temp_inside", "temp_outside", "AC", "rain", "sun"]
